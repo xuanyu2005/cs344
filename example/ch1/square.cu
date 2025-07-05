@@ -5,6 +5,7 @@
 using namespace std;
 
 const int N = 1000000;
+const int BLOCKS = 8;
 typedef float tt;
 
 __global__ void square(float *d_in, float *d_out)
@@ -48,7 +49,7 @@ int main()
     // =====================================
     cudaEventRecord(start);
 
-    square<<<1, N>>>(d_in, d_out);
+    square<<<BLOCKS, N / BLOCKS>>>(d_in, d_out);
 
     cudaEventRecord(end);
     // =====================================

@@ -1,14 +1,39 @@
 ############################################################################
-# <summary> CMakeLists.txt for OpenCV and CUDA. </summary>
-# <date>    2012-02-07          </date>
-# <author>  Quan Tran Minh. edit by Johannes Kast, Michael Sarahan </author>
-# <email>   quantm@unist.ac.kr  kast.jo@googlemail.com msarahan@gmail.com</email>
+# <summary> 现代化的 CMakeLists.txt 用于 CUDA 和 OpenCV. </summary>
+# <date>    2024-05-21 (最终完整版) </date>
 ############################################################################
 
-# collect source files
+# 1. 指定 CMake 最低版本
+cmake_minimum_required(VERSION 3.18)
 
-file( GLOB  hdr *.hpp *.h )
-file( GLOB  cu  *.cu)
-SET (HW1_files main.cpp reference_calc.cpp compare.cpp)
+# 2. 声明项目名称和语言
+project(Homework1 LANGUAGES CXX C CUDA)
 
-CUDA_ADD_EXECUTABLE(HW1 ${HW1_files} ${hdr} ${cu})
+# 3. 显式地寻找所有依赖包
+#    我们不仅需要 CUDA 工具包，还需要 OpenCV
+find_package(CUDAToolkit REQUIRED)
+find_package(OpenCV REQUIRED)      # <--- 这是新增的一行
+
+# 4. 设置 C++ 和 CUDA 标准
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CUDA_STANDARD 17)
+set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+
+# 5. 收集源文件
+file(GLOB hdr *.hpp *.h)
+file(GLOB cu *.cu)
+set(HW1_files main.cpp reference_calc.cpp compare.cpp)
+
+# 6. 创建可执行文件
+add_executable(HW1 
+    ${HW1_files}
+    ${cu}
+)
+
+# 7. 将我们的目标链接到所有需要的库
+#    我们不仅要链接 CUDA 工具包，还要链接 OpenCV
+target_link_libraries(HW1 PRIVATE 
+    CUDA::toolkit
+    ${OpenCV_LIBS}      # <--- 这是新增的一行
+)
