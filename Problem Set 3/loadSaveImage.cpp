@@ -5,36 +5,42 @@
 #include <stdio.h>
 #include "cuda_runtime.h"
 
-//The caller becomes responsible for the returned pointer. This
-//is done in the interest of keeping this code as simple as possible.
-//In production code this is a bad idea - we should use RAII
-//to ensure the memory is freed.  DO NOT COPY THIS AND USE IN PRODUCTION
-//CODE!!!
+// The caller becomes responsible for the returned pointer. This
+// is done in the interest of keeping this code as simple as possible.
+// In production code this is a bad idea - we should use RAII
+// to ensure the memory is freed.  DO NOT COPY THIS AND USE IN PRODUCTION
+// CODE!!!
 void loadImageHDR(const std::string &filename,
                   float **imagePtr,
                   size_t *numRows, size_t *numCols)
 {
-    cv::Mat originImg = cv::imread(filename.c_str(), CV_LOAD_IMAGE_COLOR | CV_LOAD_IMAGE_ANYDEPTH);
+  cv::Mat originImg = cv::imread(filename.c_str(), cv::IMREAD_COLOR | cv::IMREAD_ANYDEPTH);
 
-    cv::Mat image;
+  cv::Mat image;
 
-    if(originImg.type() != CV_32FC3){
-      originImg.convertTo(image,CV_32FC3);
-    } else{
-      image = originImg;
-    }
+  if (originImg.type() != CV_32FC3)
+  {
+    originImg.convertTo(image, CV_32FC3);
+  }
+  else
+  {
+    image = originImg;
+  }
 
-  if (image.empty()) {
+  if (image.empty())
+  {
     std::cerr << "Couldn't open file: " << filename << std::endl;
     exit(1);
   }
 
-  if (image.channels() != 3) {
+  if (image.channels() != 3)
+  {
     std::cerr << "Image must be color!" << std::endl;
     exit(1);
   }
 
-  if (!image.isContinuous()) {
+  if (!image.isContinuous())
+  {
     std::cerr << "Image isn't continuous!" << std::endl;
     exit(1);
   }
@@ -53,29 +59,33 @@ void loadImageRGBA(const std::string &filename,
                    uchar4 **imagePtr,
                    size_t *numRows, size_t *numCols)
 {
-  cv::Mat image = cv::imread(filename.c_str(), CV_LOAD_IMAGE_COLOR);
-  if (image.empty()) {
+  cv::Mat image = cv::imread(filename.c_str(), cv::IMREAD_COLOR);
+  if (image.empty())
+  {
     std::cerr << "Couldn't open file: " << filename << std::endl;
     exit(1);
   }
 
-  if (image.channels() != 3) {
+  if (image.channels() != 3)
+  {
     std::cerr << "Image must be color!" << std::endl;
     exit(1);
   }
 
-  if (!image.isContinuous()) {
+  if (!image.isContinuous())
+  {
     std::cerr << "Image isn't continuous!" << std::endl;
     exit(1);
   }
 
   cv::Mat imageRGBA;
-  cv::cvtColor(image, imageRGBA, CV_BGR2RGBA);
+  cv::cvtColor(image, imageRGBA, cv::COLOR_BGR2RGBA);
 
   *imagePtr = new uchar4[image.rows * image.cols];
 
   unsigned char *cvPtr = imageRGBA.ptr<unsigned char>(0);
-  for (size_t i = 0; i < image.rows * image.cols; ++i) {
+  for (size_t i = 0; i < image.rows * image.cols; ++i)
+  {
     (*imagePtr)[i].x = cvPtr[4 * i + 0];
     (*imagePtr)[i].y = cvPtr[4 * i + 1];
     (*imagePtr)[i].z = cvPtr[4 * i + 2];
@@ -86,7 +96,7 @@ void loadImageRGBA(const std::string &filename,
   *numCols = image.cols;
 }
 
-void saveImageRGBA(const uchar4* const image,
+void saveImageRGBA(const uchar4 *const image,
                    const size_t numRows, const size_t numCols,
                    const std::string &output_file)
 {
@@ -95,14 +105,14 @@ void saveImageRGBA(const uchar4* const image,
   sizes[1] = numCols;
   cv::Mat imageRGBA(2, sizes, CV_8UC4, (void *)image);
   cv::Mat imageOutputBGR;
-  cv::cvtColor(imageRGBA, imageOutputBGR, CV_RGBA2BGR);
-  //output the image
+  cv::cvtColor(imageRGBA, imageOutputBGR, cv::COLOR_RGBA2BGR);
+  // output the image
   cv::imwrite(output_file.c_str(), imageOutputBGR);
 }
 
-//output an exr file
-//assumed to already be BGR
-void saveImageHDR(const float* const image,
+// output an exr file
+// assumed to already be BGR
+void saveImageHDR(const float *const image,
                   const size_t numRows, const size_t numCols,
                   const std::string &output_file)
 {

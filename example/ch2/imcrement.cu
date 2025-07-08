@@ -3,7 +3,6 @@ using namespace std;
 
 const int THREADS_NUM = 1000000;
 const int ARRAY_SIZE = 10;
-
 const int BLOCK_WIDTH = 1000;
 
 __global__ void imcrement_naive(int *arr)
