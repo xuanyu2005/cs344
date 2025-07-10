@@ -177,6 +177,34 @@ __global__ void sharedMemScan(real *d_x, real *d_y) {
 }
 ```
 **重点还是在for循环编写**
+##### blelloch scan
+两个阶段
+- up
+![alt text](image-3.png)
+- down
+![alt text](image-2.png)
+```
+阶段一：
+(int* a, int N){
+    int d;
+    d 从0到（logN-1）:
+        并行：i从0到（N-1），步长2**(d+1):
+            a[i+2**(d+1) -1] += a[i+2**d -1];
+}
+```
+```
+阶段二：
+(int* a, int N){
+    a[N-1]=0
+    int d;
+    d 从（logN-1）到0:
+        并行：i从0到（N-1），步长2**(d+1):
+            t = a[i+2**d -1];
+            a[i+2**d -1] = a[i+2**(d+1) -1];
+            a[i+2**(d+1) -1] += t;
+}
+```
+
 ##### 使用thrust库
 ```c++
 #include <thrust/scan.h>
